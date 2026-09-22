@@ -13,6 +13,8 @@ import state from "../game/state.js";
 import participant from "../core/participant.js";
 import projectConfig from "../project/project-config.js";
 
+import { createTimeContext } from "./time-context.js";
+
 class AnswerStore {
   constructor() {
     this.answers = {};
@@ -31,6 +33,7 @@ class AnswerStore {
     questionId,
     choiceId,
     choiceText = null,
+    timeContext,
   }) {
     if (!config.LOG.SAVE_ANSWER_LOG) {
       return null;
@@ -51,6 +54,7 @@ class AnswerStore {
       answerType: "choice",
       value: choiceId,
       displayValue: choiceText,
+      timeContext,
     });
   }
 
@@ -65,6 +69,7 @@ class AnswerStore {
   saveTextInput({
     inputId,
     inputText,
+    timeContext,
   }) {
     if (!config.LOG.SAVE_ANSWER_LOG) {
       return null;
@@ -86,6 +91,7 @@ class AnswerStore {
       answerType: "text_input",
       value: inputText,
       displayValue: inputText,
+      timeContext,
     });
   }
 
@@ -104,6 +110,7 @@ class AnswerStore {
     answerType,
     value,
     displayValue,
+    timeContext = createTimeContext(),
   }) {
     const sessionInfo =
       player.getSessionInfo();
@@ -139,8 +146,8 @@ class AnswerStore {
       value,
       displayValue,
 
-      answeredAt:
-        new Date().toISOString(),
+      ...timeContext,
+      answeredAt: timeContext.timestamp,
 
 environment:
   config.ENVIRONMENT,

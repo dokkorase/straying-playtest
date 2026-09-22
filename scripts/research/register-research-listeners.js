@@ -13,6 +13,7 @@ import answerStore from "./answer-store.js";
 import researchStorage from "./research-storage.js";
 import researchDispatcher from "./research-dispatcher.js";
 import config from "../core/config.js";
+import { createTimeContext } from "./time-context.js";
 let registered = false;
 let dispatchRequested = false;
 
@@ -65,12 +66,15 @@ export function registerResearchListeners() {
   registered = true;
 
   eventBus.on(EventType.CHOICE_SELECTED, (data) => {
+    const timeContext = createTimeContext();
     const eventLog = logger.logEvent({
+      timeContext,
       eventType: EventType.CHOICE_SELECTED,
       data,
     });
 
     const answer = answerStore.saveChoice({
+      timeContext,
       questionId: data.questionId,
       choiceId: data.choiceId,
       choiceText: data.choiceText ?? null,
@@ -88,12 +92,15 @@ export function registerResearchListeners() {
   });
 
   eventBus.on(EventType.TEXT_INPUT_SUBMITTED, (data) => {
+    const timeContext = createTimeContext();
     const eventLog = logger.logEvent({
+      timeContext,
       eventType: EventType.TEXT_INPUT_SUBMITTED,
       data,
     });
 
     const answer = answerStore.saveTextInput({
+      timeContext,
       inputId: data.inputId,
       inputText: data.inputText,
     });

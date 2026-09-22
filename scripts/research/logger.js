@@ -12,6 +12,8 @@ import player from "../core/player.js";
 import state from "../game/state.js";
 import participant from "../core/participant.js";
 
+import { createTimeContext } from "./time-context.js";
+
 class ResearchLogger {
   constructor() {
     this.eventLogs = [];
@@ -25,7 +27,7 @@ class ResearchLogger {
    * @param {Object} [params.data]
    * @returns {Object|null}
    */
-  logEvent({ eventType, data = {} }) {
+  logEvent({ eventType, data = {}, timeContext = createTimeContext() }) {
     if (!config.LOG.SAVE_EVENT_LOG) {
       return null;
     }
@@ -45,7 +47,7 @@ class ResearchLogger {
       sessionId: sessionInfo.sessionId,
       participantId:
       participantInfo.participantId,      
-      timestamp: new Date().toISOString(),
+      ...timeContext,
 
       eventType,
 
