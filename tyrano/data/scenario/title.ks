@@ -135,9 +135,9 @@ if ($('#straying-title-style').length === 0) {
             box-sizing: border-box;
 
             color: #ffffff;
-            font-family: sans-serif;
+            font-family: "Montserrat", sans-serif;
             font-size: 30px;
-            font-weight: normal;
+            font-weight: 400;
             letter-spacing: 0.08em;
 
             text-align: center;
@@ -219,7 +219,7 @@ function createTitleButton(id, text, x, y, target) {
 
 createTitleButton(
     'straying-start-button',
-    'START',
+    'NEW GAME',
     200,
     460,
     '*gamestart'
@@ -519,7 +519,7 @@ function createTitleLanguageItem(
             boxSizing: 'border-box',
 
             fontFamily:
-                '"Straying Sans", sans-serif',
+                '"Montserrat", sans-serif',
 
             color: '#ffffff',
 

@@ -3801,6 +3801,11 @@ var $menuBtns = $('.fixlayer').filter(function() {
            src.indexOf("btn_menu_") !== -1;
 });
 
+$menuBtns.css({
+    boxSizing: 'content-box',
+    padding: '20px 6px',
+    margin: '-20px -6px'
+});
 
 // --------------------------------------------------
 // フェードイン

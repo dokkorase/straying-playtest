@@ -22,3 +22,12 @@ Play: https://dokkorase.github.io/straying-playtest/
 GitHub Pages publishes `main` from the repository root. Keep `.nojekyll`, `index.html`, `scripts/`, and `tyrano/` together: the game imports `../scripts/index.js`.
 
 This is a separate deployment snapshot, not an automatic mirror of the development branch. Copy only reviewed runtime changes and game assets into this repository before committing and pushing. Do not copy Apps Script server files, research exports, local backups, or development repository history. The deployment receiver URL is intentionally browser-visible; it is not a secret credential.
+
+## Release update — 2026-09-24
+
+- Synced runtime differences from development commit d234c206e31b79ccd04341be9000998e3fe5eefc.
+- NEW GAME, Montserrat title controls, English EXIT and current menu improvements are included.
+- Retained the existing browser research receiver configuration, timestamp recording and Control holdskip.
+- Removed unused development scenarios, backup files and OS metadata from the current distribution.
+- Checked 31 research/runtime JS files, KeyConfig.js, 86 embedded scenario script blocks and 69 static runtime references before deployment.
+

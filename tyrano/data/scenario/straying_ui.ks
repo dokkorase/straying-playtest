@@ -140,11 +140,19 @@ window.StrayingUI.applyFonts = function () {
     css += 'font-weight:400;';
     css += '}';
 
-    // --------------------------------------------------
-    // タイトル・通知ボタン
+        // --------------------------------------------------
+    // タイトルボタン
     // --------------------------------------------------
 
-    css += '.straying-title-button,';
+    css += '.straying-title-button {';
+    css += 'font-family:"Montserrat",sans-serif !important;';
+    css += 'font-weight:400;';
+    css += '}';
+
+    // --------------------------------------------------
+    // 通知ボタン
+    // --------------------------------------------------
+
     css += '.straying-notice-button {';
     css += 'font-family:"Straying Sans",sans-serif !important;';
     css += 'font-weight:500;';
@@ -512,9 +520,10 @@ window.StrayingUI.createLanguageUI = function (fadeIn) {
 
     });
 
-    $strayingMenuButton.each(function () {
+        $strayingMenuButton.each(function () {
 
         var menuButton = this;
+        var lastTouchTime = 0;
 
         if (menuButton.dataset.strayingMenuRegistered === 'true') {
             return;
@@ -522,9 +531,32 @@ window.StrayingUI.createLanguageUI = function (fadeIn) {
 
         menuButton.dataset.strayingMenuRegistered = 'true';
 
+        // スマートフォン・タブレット
+        menuButton.addEventListener(
+            'touchend',
+            function (e) {
+
+                lastTouchTime = Date.now();
+
+                e.preventDefault();
+                e.stopPropagation();
+                e.stopImmediatePropagation();
+
+                window.StrayingUI.showMenu();
+
+            },
+            true
+        );
+
+        // PC
         menuButton.addEventListener(
             'click',
             function (e) {
+
+                // touchend直後に生成されたclickは無視
+                if (Date.now() - lastTouchTime < 700) {
+                    return;
+                }
 
                 e.preventDefault();
                 e.stopPropagation();
@@ -1147,6 +1179,12 @@ $('#straying-lang-button').hide();
 
 window.StrayingUI.showExit = function () {
 
+    var lang =
+        window.StrayingI18n.getLanguage();
+
+    var isEnglish =
+        lang === 'en';
+
     // 二重生成防止
     $('#straying-exit-overlay').remove();
 
@@ -1259,8 +1297,13 @@ window.StrayingUI.showExit = function () {
     // --------------------------------------------------
 
     var $message =
-    $('<div>プレイを終了しますか？<br><span style="font-size:16px; opacity:0.65;">中断しても、タイトル画面の「CONTINUE」からいつでも再開することができます。</span></div>');
+    $('<div></div>');
 
+$message.html(
+    isEnglish
+        ? 'Exit the game?<br><span style="font-size:16px; opacity:0.65;">You can resume your game at any time by selecting “CONTINUE” on the title screen.</span>'
+        : 'プレイを終了しますか？<br><span style="font-size:16px; opacity:0.65;">中断しても、タイトル画面の「CONTINUE」からいつでも再開することができます。</span>'
+);
     $message.css({
 
         fontFamily:
@@ -1301,7 +1344,13 @@ window.StrayingUI.showExit = function () {
     // --------------------------------------------------
 
     var $cancel =
-        $('<div>戻る</div>');
+    $('<div></div>');
+
+$cancel.text(
+    isEnglish
+        ? 'BACK'
+        : '戻る'
+);
 
     $cancel.css({
 
@@ -1338,7 +1387,13 @@ window.StrayingUI.showExit = function () {
     // --------------------------------------------------
 
     var $exit =
-        $('<div>終了する</div>');
+    $('<div></div>');
+
+$exit.text(
+    isEnglish
+        ? 'EXIT'
+        : '終了する'
+);
 
     $exit.css({
 
@@ -1836,6 +1891,33 @@ window.StrayingUI.showMenu = function () {
         );
 
 
+
+    // ==================================================
+    // スマートフォン向け音量案内
+    // ==================================================
+
+    var $mobileVolumeNote =
+    $('<div>※ スマートフォンでは音量調整が正常に動作しない場合があります。端末本体の音量設定をご利用ください。<br>On smartphones, volume controls may not work properly. Please use your device&rsquo;s volume controls instead.</div>');
+    $mobileVolumeNote.css({
+
+        fontFamily:
+            '"Straying Sans", sans-serif',
+
+        fontSize: '14px',
+
+        lineHeight: '1.7',
+
+        letterSpacing: '0.04em',
+
+        color:
+            'rgba(255,255,255,0.55)',
+
+        marginTop: '-8px',
+
+        marginBottom: '0'
+
+    });
+
     // --------------------------------------------------
     // 区切り
     // --------------------------------------------------
@@ -2270,8 +2352,20 @@ window.StrayingUI.showMenu = function () {
 
         cursor: 'pointer',
 
-        padding:
-            '8px 0 8px 20px'
+                padding:
+            '14px 14px 14px 20px',
+
+        minWidth: '44px',
+
+        minHeight: '44px',
+
+        boxSizing: 'border-box',
+
+        display: 'flex',
+
+        alignItems: 'center',
+
+        justifyContent: 'flex-end'
 
     });
 
@@ -2349,8 +2443,12 @@ window.StrayingUI.showMenu = function () {
         $bgmRow
     );
 
-    $container.append(
+        $container.append(
         $seRow
+    );
+
+    $container.append(
+        $mobileVolumeNote
     );
 
     $container.append(
