@@ -3407,18 +3407,6 @@ $credits.one('click', function () {
 
 
     // --------------------------------------------------
-    // 仮アンケートURL
-    // 本番URLが届いたらここだけ差し替える
-    // --------------------------------------------------
-
-    var surveyUrlJa =
-        'https://example.com/#straying-post-survey-ja';
-
-    var surveyUrlEn =
-        'https://example.com/#straying-post-survey-en';
-
-
-    // --------------------------------------------------
     // 画面
     // --------------------------------------------------
 
@@ -3521,8 +3509,8 @@ $credits.one('click', function () {
 
     var bodyText =
         isEnglish
-            ? 'Please complete the post-game survey about your experience.'
-            : '今回の体験について、アンケートへのご回答をお願いいたします。';
+            ? 'Saving your responses. Please keep this tab open.'
+            : '回答を保存しています。このタブを開いたままお待ちください。';
 
     var $body =
         $('<div></div>')
@@ -3540,13 +3528,13 @@ $credits.one('click', function () {
 
 
     // --------------------------------------------------
-    // アンケートボタン
+    // アンケートへの遷移／送信に失敗した場合の再試行ボタン
     // --------------------------------------------------
 
     var buttonText =
         isEnglish
-            ? 'CONTINUE TO SURVEY'
-            : 'アンケートへ進む';
+            ? 'TRY AGAIN'
+            : '再試行';
 
     var $button =
         $('<div></div>')
@@ -3613,50 +3601,69 @@ $credits.one('click', function () {
     );
 
 
-    var isSurveyTransitioning = false;
+    // 送信完了後に、既存のEXITと同じ起動ページへ戻るリンクを表示する。
+    var $titleLink = $('<a href="./index.html"></a>')
+        .text(isEnglish ? 'BACK TO TITLE' : 'タイトルへ戻る')
+        .css({
+            display: 'none',
+            color: '#e69948',
+            fontFamily: '"Montserrat", "Straying Sans", sans-serif',
+            fontSize: '20px',
+            textDecoration: 'underline',
+            textUnderlineOffset: '5px',
+            padding: '12px 20px',
+            cursor: 'pointer'
+        })
+        .on('click', function (e) {
+            e.stopPropagation();
+        });
 
-$button.on(
-    'click',
-    async function (e) {
+    var surveyUrl = 'https://sunaonahito.github.io/game-survey/index_v2_20260928.html';
+    var isReadyForSurvey = false;
+    var isSending = false;
+
+    async function sendFinalRecords() {
+        if (isSending) return;
+        isSending = true;
+        isReadyForSurvey = false;
+        $button.hide();
+        $titleLink.hide();
+        $body.text(isEnglish
+            ? 'Saving your responses. Please keep this tab open.'
+            : '回答を保存しています。このタブを開いたままお待ちください。');
+
+        try {
+            var flushResult = await window.RNF.flushResearchRecords();
+            if (!flushResult || !flushResult.success || window.RNF.getResearchQueueCount() > 0) {
+                throw new Error('Research records are still pending.');
+            }
+            $body.text(isEnglish
+                ? 'Please complete the post-game survey about your experience.'
+                : '今回の体験について、アンケートへのご回答をお願いいたします。');
+            isReadyForSurvey = true;
+            $button.text(isEnglish ? 'CONTINUE TO SURVEY' : 'アンケートへ進む')
+                .css('display', 'flex');
+            $titleLink.css('display', 'inline-block');
+        } catch (error) {
+            console.error('Straying: final research data upload failed.', error);
+            $body.text(isEnglish
+                ? 'Your responses could not be saved. Please check your connection and try again before closing this tab.'
+                : '回答の保存が完了していません。このタブを閉じずに、通信状況を確認して再試行してください。');
+            $button.text(buttonText).css('display', 'flex');
+        } finally {
+            isSending = false;
+        }
+    }
+
+    $button.hide().on('click', function (e) {
         e.preventDefault();
         e.stopPropagation();
-
-        if (isSurveyTransitioning) {
+        if (isReadyForSurvey) {
+            window.location.href = surveyUrl;
             return;
         }
-
-        isSurveyTransitioning = true;
-
-        var url =
-            isEnglish
-                ? surveyUrlEn
-                : surveyUrlJa;
-
-        var flushResult =
-            await window.RNF.flushResearchRecords();
-
-        if (
-            !flushResult.success ||
-            window.RNF.getResearchQueueCount() > 0
-        ) {
-            console.error(
-                'Straying: 研究データの送信が完了していないため、アンケート遷移を中止します。',
-                flushResult
-            );
-
-            isSurveyTransitioning = false;
-            return;
-        }
-
-        console.log(
-            '✅ Straying: 研究データ送信完了。事後アンケートへ移動します。'
-        );
-
-        window.location.href =
-            url;
-    }
-);
-
+        sendFinalRecords();
+    });
 
     // --------------------------------------------------
     // コピー
@@ -3698,11 +3705,15 @@ $button.on(
     $content.append($line);
     $content.append($body);
     $content.append($button);
+    $content.append($titleLink);
 
     $screen.append($content);
     $screen.append($tagline);
 
     $('#tyrano_base').append($screen);
+
+    // 終了画面の表示時に研究データを最終送信する。
+    sendFinalRecords();
 
 
     // --------------------------------------------------
